@@ -1,26 +1,30 @@
+# main.py
 import os
-import google.generativeai as genAi
+from google import genai
 from dotenv import load_dotenv
 
-# Load .env
 load_dotenv()
 
-#configure gemini
+print("🤖 Gemini Chat Assistant (powered by uv!)")
+print("Type 'quit', 'exit', or 'bye' to stop\n")
+
+# Get API key from environment
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    print("Error : GEMINI_API_KEY not found in .env file")
+    print("Error: Set GEMINI_API_KEY environment variable!")
+    print("Example: $env:GEMINI_API_KEY =", api_key)
+    exit(1)
 
-genAi.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
-model = genAi.GenerativeModel('gemini-1.5-flash')
+# Fast & current model in 2026
+MODEL = "gemini-2.5-flash"   # or "gemini-2.5-flash-lite" for even faster/cheaper
 
-print("🤖 Gemini Chat Assistant")
-print("Type 'exit' or 'quit' to stop\n")
+chat = client.chats.create(model=MODEL)
 
 while True:
     user_input = input("You: ").strip()
-    
-    if user_input.lower() in ['exit', 'quit', 'bye']:
+    if user_input.lower() in ["quit", "exit", "bye"]:
         print("Goodbye! 👋")
         break
     
@@ -28,8 +32,8 @@ while True:
         continue
     
     try:
-        response = model.generate_content(user_input)
-        print("\nGemini:", response.text.strip())
-        print("-" * 60)
+        response = chat.send_message(user_input)
+        print(f"Gemini: {response.text}\n")
     except Exception as e:
-        print("Error:", str(e))
+        print(f"Error: {str(e)}")
+        print("Check key, quota, or model name.")
